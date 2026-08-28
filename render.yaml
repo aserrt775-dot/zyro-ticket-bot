@@ -4,7 +4,6 @@ services:
     runtime: python
     pythonVersion: "3.12.3"
     plan: free
-    buildCommand: pip install -r requirements.txt
     startCommand: python bot.py
     envVars:
       - key: DISCORD_TOKEN
