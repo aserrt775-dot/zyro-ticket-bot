@@ -470,6 +470,149 @@ class CloseTicketView(discord.ui.View):
 
 
 # =========================================================
+# HELPERS
+# =========================================================
+
+def is_ticket_channel(channel, guild):
+    """Vérifie que le salon est bien un ticket accessible."""
+    if not isinstance(channel, discord.TextChannel):
+        return False
+    if guild is None:
+        return False
+    if not channel.topic:
+        return False
+    if not channel.topic.startswith("ticket-owner:"):
+        return False
+    return True
+
+
+def has_staff_perms(user, guild):
+    """Détermine si l'utilisateur peut gérer les tickets."""
+    staff_role, zyro_role = None, None
+    if guild is not None:
+        staff_role = discord.utils.get(
+            guild.roles,
+            name=STAFF_ROLE_NAME
+        )
+        zyro_role = discord.utils.get(
+            guild.roles,
+            name=ZYRO_ROLE_NAME
+        )
+    is_staff = staff_role is not None and staff_role in user.roles
+    is_zyro = zyro_role is not None and zyro_role in user.roles
+    is_admin = user.guild_permissions.manage_channels
+    return is_staff or is_zyro or is_admin
+
+
+# =========================================================
+# COMMANDE /CLOSE
+# =========================================================
+
+@bot.tree.command(
+    name="close",
+    description="Close the current ticket channel"
+)
+async def close_command(
+    interaction: discord.Interaction
+):
+
+    guild = interaction.guild
+
+    if not is_ticket_channel(interaction.channel, guild):
+        await interaction.response.send_message(
+            "❌ This is not a ticket channel.",
+            ephemeral=True
+        )
+        return
+
+    if not has_staff_perms(interaction.user, guild):
+        await interaction.response.send_message(
+            "❌ Only Ticket Staff or ZYRO can close tickets.",
+            ephemeral=True
+        )
+        return
+
+    await interaction.response.send_message(
+        "🔒 Closing ticket...",
+        ephemeral=True
+    )
+
+    await interaction.channel.delete(
+        reason=f"Ticket closed by {interaction.user}"
+    )
+
+
+# =========================================================
+# COMMANDE /RENAME
+# =========================================================
+
+@bot.tree.command(
+    name="rename",
+    description="Rename the current ticket channel"
+)
+@app_commands.describe(
+    name="The new name for this ticket"
+)
+async def rename_command(
+    interaction: discord.Interaction,
+    name: str
+):
+
+    guild = interaction.guild
+
+    if not is_ticket_channel(interaction.channel, guild):
+        await interaction.response.send_message(
+            "❌ This is not a ticket channel.",
+            ephemeral=True
+        )
+        return
+
+    if not has_staff_perms(interaction.user, guild):
+        await interaction.response.send_message(
+            "❌ Only Ticket Staff or ZYRO can rename tickets.",
+            ephemeral=True
+        )
+        return
+
+    clean = name.strip()
+    if not clean:
+        await interaction.response.send_message(
+            "❌ Please provide a valid name.",
+            ephemeral=True
+        )
+        return
+
+    valid = "".join(
+        ch for ch in clean if ch.isalnum() or ch in "-_"
+    )
+    if not valid:
+        await interaction.response.send_message(
+            "❌ Name cannot be empty after cleaning.",
+            ephemeral=True
+        )
+        return
+
+    old = interaction.channel.name
+
+    try:
+        await interaction.channel.edit(
+            name=valid[:32],
+            reason=f"Ticket renamed by {interaction.user}"
+        )
+    except discord.Forbidden:
+        await interaction.response.send_message(
+            "❌ I don't have permission to rename this ticket.",
+            ephemeral=True
+        )
+        return
+
+    await interaction.response.send_message(
+        f"✅ Ticket renamed from `{old}` to `{valid[:32]}`.",
+        ephemeral=True
+    )
+
+
+# =========================================================
 # SETUP TICKETS
 # =========================================================
 
