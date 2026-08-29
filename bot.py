@@ -76,7 +76,7 @@ class TicketDropdown(discord.ui.Select):
                 label="Purchase",
                 value="purchase",
                 description="Payment & billing inquiries",
-                emoji="🛒"
+                emoji="<:999284cash:1543350068822941799>"
             ),
             discord.SelectOption(
                 label="Key Reset",
@@ -609,7 +609,7 @@ async def setup_tickets(
             "to open a ticket. Our team will respond as quickly as possible. 🎧\n\n"
             "**📦 Available Support Categories**\n"
             f"{arrow} ❓ **Support** — Technical problems, bugs\n"
-            f"{arrow} 🛒 **Purchase** — Payment & billing inquiries\n"
+            f"{arrow} <:999284cash:1543350068822941799> **Purchase** — Payment & billing inquiries\n"
             f"{arrow} ⚠️ **Key Reset** — Reset your license key HWID\n"
             f"{arrow} 📷 **Media** — Media-related requests\n"
             f"{arrow} 💰 **Reseller** — Reseller requests\n\n"
@@ -623,7 +623,7 @@ async def setup_tickets(
         color=discord.Color.red()
     )
 
-    embed.set_thumbnail(
+    embed.set_image(
         url="https://media.discordapp.net/attachments/1527063506762072205/1543348163572932711/ChatGPT_Image_Aug_29_2026_09_53_24_PM.png?ex=6a948a7c&is=6a9338fc&hm=7cc201c89f0209bf4ba539906480d7f9b2107ec913f6ab41495e53a6c612e99a&=&format=webp&quality=lossless&width=640&height=361"
     )
 
