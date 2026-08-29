@@ -609,7 +609,7 @@ async def setup_tickets(
             "to open a ticket. Our team will respond as quickly as possible. 🎧\n\n"
             "**📦 Available Support Categories**\n"
             f"{arrow} ❓ **Support** — Technical problems, bugs\n"
-            f"{arrow} <:999284cash:1543350068822941799> **Purchase** — Payment & billing inquiries\n"
+            f"{arrow} 🛒 **Purchase** — Payment & billing inquiries\n"
             f"{arrow} ⚠️ **Key Reset** — Reset your license key HWID\n"
             f"{arrow} 📷 **Media** — Media-related requests\n"
             f"{arrow} 💰 **Reseller** — Reseller requests\n\n"
