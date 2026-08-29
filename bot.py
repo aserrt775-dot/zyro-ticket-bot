@@ -385,10 +385,102 @@ class TicketView(discord.ui.View):
 # FERMER UN TICKET
 # =========================================================
 
+class RenameTicketModal(discord.ui.Modal, title="Rename Ticket"):
+    name = discord.ui.TextInput(
+        label="New ticket name",
+        placeholder="e.g. support-username",
+        max_length=32,
+        required=True
+    )
+
+    async def on_submit(self, interaction: discord.Interaction):
+        channel = interaction.channel
+        guild = interaction.guild
+
+        if not is_ticket_channel(channel, guild):
+            await interaction.response.send_message(
+                "❌ This is not a ticket channel.",
+                ephemeral=True
+            )
+            return
+
+        if not has_staff_perms(interaction.user, guild):
+            await interaction.response.send_message(
+                "❌ Only Ticket Staff or ZYRO can rename tickets.",
+                ephemeral=True
+            )
+            return
+
+        clean = self.name.value.strip()
+        if not clean:
+            await interaction.response.send_message(
+                "❌ Please provide a valid name.",
+                ephemeral=True
+            )
+            return
+
+        valid = "".join(
+            ch for ch in clean if ch.isalnum() or ch in "-_"
+        )
+        if not valid:
+            await interaction.response.send_message(
+                "❌ Name cannot be empty after cleaning.",
+                ephemeral=True
+            )
+            return
+
+        old = channel.name
+
+        try:
+            await channel.edit(
+                name=valid[:32],
+                reason=f"Ticket renamed by {interaction.user}"
+            )
+        except discord.Forbidden:
+            await interaction.response.send_message(
+                "❌ I don't have permission to rename this ticket.",
+                ephemeral=True
+            )
+            return
+
+        await interaction.response.send_message(
+            f"✅ Ticket renamed from `{old}` to `{valid[:32]}`.",
+            ephemeral=True
+        )
+
+
 class CloseTicketView(discord.ui.View):
 
     def __init__(self):
         super().__init__(timeout=None)
+
+    @discord.ui.button(
+        label="Rename Ticket",
+        emoji="✏️",
+        style=discord.ButtonStyle.secondary,
+        custom_id="rename_ticket"
+    )
+    async def rename_ticket(
+        self,
+        interaction: discord.Interaction,
+        button: discord.ui.Button
+    ):
+
+        if not is_ticket_channel(interaction.channel, interaction.guild):
+            await interaction.response.send_message(
+                "❌ This is not a ticket channel.",
+                ephemeral=True
+            )
+            return
+
+        if not has_staff_perms(interaction.user, interaction.guild):
+            await interaction.response.send_message(
+                "❌ Only Ticket Staff or ZYRO can rename tickets.",
+                ephemeral=True
+            )
+            return
+
+        await interaction.response.send_modal(RenameTicketModal())
 
     @discord.ui.button(
         label="Close Ticket",
