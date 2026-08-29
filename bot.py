@@ -37,6 +37,11 @@ TICKET_CATEGORIES = {
         "name": "💰・Reseller",
         "emoji": "💰",
         "label": "Reseller"
+    },
+    "keyreset": {
+        "name": "🔑・Key Reset",
+        "emoji": "🔑",
+        "label": "Key Reset"
     }
 }
 
@@ -57,10 +62,62 @@ bot = commands.Bot(
 # CRÉATION DU TICKET
 # =========================================================
 
+class TicketDropdown(discord.ui.Select):
+
+    def __init__(self):
+        options = [
+            discord.SelectOption(
+                label="Support",
+                value="support",
+                description="Technical problems, bugs",
+                emoji="❓"
+            ),
+            discord.SelectOption(
+                label="Purchase",
+                value="purchase",
+                description="Payment & billing inquiries",
+                emoji="🛒"
+            ),
+            discord.SelectOption(
+                label="Key Reset",
+                value="keyreset",
+                description="Reset your license key HWID",
+                emoji="🔑"
+            ),
+            discord.SelectOption(
+                label="Media",
+                value="media",
+                description="Media-related requests",
+                emoji="📷"
+            ),
+            discord.SelectOption(
+                label="Reseller",
+                value="reseller",
+                description="Reseller requests",
+                emoji="💰"
+            )
+        ]
+
+        super().__init__(
+            placeholder="Select the right category...",
+            min_values=1,
+            max_values=1,
+            options=options,
+            custom_id="ticket_topic_select"
+        )
+
+    async def callback(self, interaction: discord.Interaction):
+        await self.view.create_ticket(
+            interaction,
+            self.values[0]
+        )
+
+
 class TicketView(discord.ui.View):
 
     def __init__(self):
         super().__init__(timeout=None)
+        self.add_item(TicketDropdown())
 
     async def create_ticket(
         self,
@@ -323,74 +380,6 @@ class TicketView(discord.ui.View):
             ephemeral=True
         )
 
-    # =====================================================
-    # BOUTONS
-    # =====================================================
-
-    @discord.ui.button(
-        label="Media",
-        emoji="📷",
-        style=discord.ButtonStyle.secondary,
-        custom_id="ticket_media"
-    )
-    async def media(
-        self,
-        interaction: discord.Interaction,
-        button: discord.ui.Button
-    ):
-        await self.create_ticket(
-            interaction,
-            "media"
-        )
-
-    @discord.ui.button(
-        label="Purchase",
-        emoji="🛒",
-        style=discord.ButtonStyle.secondary,
-        custom_id="ticket_purchase"
-    )
-    async def purchase(
-        self,
-        interaction: discord.Interaction,
-        button: discord.ui.Button
-    ):
-        await self.create_ticket(
-            interaction,
-            "purchase"
-        )
-
-    @discord.ui.button(
-        label="Support",
-        emoji="❓",
-        style=discord.ButtonStyle.secondary,
-        custom_id="ticket_support"
-    )
-    async def support(
-        self,
-        interaction: discord.Interaction,
-        button: discord.ui.Button
-    ):
-        await self.create_ticket(
-            interaction,
-            "support"
-        )
-
-    @discord.ui.button(
-        label="Reseller",
-        emoji="💰",
-        style=discord.ButtonStyle.secondary,
-        custom_id="ticket_reseller"
-    )
-    async def reseller(
-        self,
-        interaction: discord.Interaction,
-        button: discord.ui.Button
-    ):
-        await self.create_ticket(
-            interaction,
-            "reseller"
-        )
-
 
 # =========================================================
 # FERMER UN TICKET
@@ -611,24 +600,35 @@ async def setup_tickets(
     # EMBED PANEL
     # -------------------------------------------------
 
+    arrow = "<a:animatedarrowred:1542909920532238346>"
+
     embed = discord.Embed(
-        title="🎫 Support Tickets",
+        title="Welcome to our Support Center — we're here to help!",
         description=(
-            "Need help? Select a category below to open a ticket.\n\n"
-            "📷 **Media**\n"
-            "Media-related requests.\n\n"
-            "🛒 **Purchase**\n"
-            "Purchase and order questions.\n\n"
-            "❓ **Support**\n"
-            "General support.\n\n"
-            "💰 **Reseller**\n"
-            "Reseller requests."
+            f"{arrow} Select the right category from the dropdown below "
+            "to open a ticket. Our team will respond as quickly as possible. 🎧\n\n"
+            "**📦 Available Support Categories**\n"
+            f"{arrow} ❓ **Support** — Technical problems, bugs\n"
+            f"{arrow} 🛒 **Purchase** — Payment & billing inquiries\n"
+            f"{arrow} ⚠️ **Key Reset** — Reset your license key HWID\n"
+            f"{arrow} 📷 **Media** — Media-related requests\n"
+            f"{arrow} 💰 **Reseller** — Reseller requests\n\n"
+            "**📜 Important Guidelines**\n"
+            f"{arrow} Be clear and detailed in your message.\n"
+            f"{arrow} Remain professional and patient while waiting for support.\n"
+            f"{arrow} Misuse of the ticket system may result in restrictions.\n\n"
+            "✅ Thank you for choosing **ZYRO**. We appreciate your patience "
+            "and trust in our support team."
         ),
         color=discord.Color.red()
     )
 
+    embed.set_thumbnail(
+        url="https://media.discordapp.net/attachments/1527063506762072205/1543348163572932711/ChatGPT_Image_Aug_29_2026_09_53_24_PM.png?ex=6a948a7c&is=6a9338fc&hm=7cc201c89f0209bf4ba539906480d7f9b2107ec913f6ab41495e53a6c612e99a&=&format=webp&quality=lossless&width=640&height=361"
+    )
+
     embed.set_footer(
-        text="Zyro Ticket System • Select a category below"
+        text="Zyro Ticket System"
     )
 
     # -------------------------------------------------
